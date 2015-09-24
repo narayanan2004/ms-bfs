@@ -6,6 +6,6 @@ cd ${HOMEDIR}/boost
 echo "Bootstrapping..."
 ./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,system,thread,timer
 echo "Compiling boost..."
-./b2 -s"NO_BZIP2=1" -j8 threading=multi variant=release link=static
+./b2 -s"NO_BZIP2=1" -j8 toolset=intel threading=multi variant=release link=static
 cd ${HOMEDIR}
 make -j8 

@@ -51,14 +51,16 @@ struct BatchBits {
 
    void negate() {
       for (unsigned i = 0; i < width; ++i) {
-         data[i] = ~data[i];
+         //data[i] = ~data[i];
+         data[i] = BitBaseOp<bit_t>::lnot(data[i]);
       }
    }
 
    void setBit(const size_t ix) {
       auto field = ix/TYPE_BITS_COUNT;
       auto field_bit = ix-(field*TYPE_BITS_COUNT);
-      data[field] |= BitBaseOp<bit_t>::getSetMask(field_bit);
+      //data[field] |= BitBaseOp<bit_t>::getSetMask(field_bit);
+      data[field] = BitBaseOp<bit_t>::lor(data[field], BitBaseOp<bit_t>::getSetMask(field_bit));
    }
 };
 static const unsigned int PREFETCH=38;
@@ -324,7 +326,8 @@ struct HugeBatchBfs {
          }
          #endif
          for(int i=0; i<width; i++) {
-            curVisit.data[i] &= processQuery.data[i];
+            //curVisit.data[i] &= processQuery.data[i];
+            curVisit.data[i] = BitBaseOp<bit_t>::land(curVisit.data[i], processQuery.data[i]);
          }
          while(friendsBounds.first != friendsBounds.second) {
             #ifdef DO_PREFETCH
@@ -347,7 +350,8 @@ struct HugeBatchBfs {
             #endif
 
             for(int i=0; i<width; i++) {
-               nextVisitList[*friendsBounds.first].data[i] |= curVisit.data[i];
+               //nextVisitList[*friendsBounds.first].data[i] |= curVisit.data[i];
+               nextVisitList[*friendsBounds.first].data[i] = BitBaseOp<bit_t>::lor(nextVisitList[*friendsBounds.first].data[i], curVisit.data[i]);
             }
             ++friendsBounds.first;
       }
@@ -370,7 +374,8 @@ struct HugeBatchBfs {
                const bit_t newVisits = BitBaseOp<bit_t>::andNot(nextVisit, seen[curPerson].data[i]);
                nextVisitList[curPerson].data[i] = newVisits;
                if(BitBaseOp<bit_t>::notZero(newVisits)) {
-                  seen[curPerson].data[i] |= newVisits;
+                  //seen[curPerson].data[i] |= newVisits;
+                  seen[curPerson].data[i] = BitBaseOp<bit_t>::lor(seen[curPerson].data[i], newVisits);
                   batchDist.updateDiscovered(newVisits, i);
 
                   #ifdef BI_DIRECTIONAl
@@ -460,7 +465,8 @@ struct HugeBatchBfs {
             #endif
 
             for(int i=0; i<width; i++) {
-               nextVisit.data[i] |= visitList[*friendsBounds.first].data[i];
+               //nextVisit.data[i] |= visitList[*friendsBounds.first].data[i];
+               nextVisit.data[i] = BitBaseOp<bit_t>::lor(nextVisit.data[i], visitList[*friendsBounds.first].data[i]);
             }
             ++friendsBounds.first;
          }
@@ -472,7 +478,8 @@ struct HugeBatchBfs {
          bool nextVisitNonzero=false;
          for(int i=0; i<width; i++) {
             if(BitBaseOp<bit_t>::notZero(nextVisit.data[i])) {
-               seen[curPerson].data[i] = curSeen.data[i] | nextVisit.data[i];
+               //seen[curPerson].data[i] = curSeen.data[i] | nextVisit.data[i];
+               seen[curPerson].data[i] = BitBaseOp<bit_t>::lor(curSeen.data[i], nextVisit.data[i]);
                batchDist.updateDiscovered(nextVisit.data[i], i);
 
                nextVisitNonzero=true;
@@ -643,7 +650,8 @@ struct HugeBatchBfs {
       auto field = pos/Bitset::TYPE_BITS_COUNT;
       auto field_bit = pos-(field*Bitset::TYPE_BITS_COUNT);
 
-      if(BitBaseOp<bit_t>::notZero(processQuery.data[field] & BitBaseOp<bit_t>::getSetMask(field_bit))) {
+      //if(BitBaseOp<bit_t>::notZero(processQuery.data[field] & BitBaseOp<bit_t>::getSetMask(field_bit))) {
+      if(BitBaseOp<bit_t>::notZero(BitBaseOp<bit_t>::land(processQuery.data[field] , BitBaseOp<bit_t>::getSetMask(field_bit)))) {
          bfsData.totalReachable += numDiscovered;
          bfsData.totalDistances += numDiscovered*distance;
 

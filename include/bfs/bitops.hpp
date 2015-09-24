@@ -91,6 +91,17 @@ public:
    static bool notEquals(const bit_t a, const bit_t b) {
       return a != b;
    }
+
+   static bit_t land(const bit_t a, const bit_t b) { //logical and
+    return a & b;
+   }
+
+   static bit_t lor(const bit_t a, const bit_t b) { //logical or
+    return a | b;
+   }
+   static bit_t lnot(const bit_t a) { //logical not
+    return ~a;
+   }
 };
 
 // Normal logic again
@@ -109,6 +120,7 @@ struct CtzlOp<__m128i> {
 
 template<>
 struct BitBaseOp<__m128i> {
+
    static __m128i getSetMask(const size_t bitPos) {
       return sseMasks[bitPos];
    }
@@ -150,6 +162,20 @@ struct BitBaseOp<__m128i> {
    static bool notEquals(const __m128i a, const __m128i b) {
       const __m128i cmp = _mm_cmpeq_epi64(a, b);
       return _mm_extract_epi64(cmp,0)==0 || _mm_extract_epi64(cmp,1)==0;
+   }
+
+   static __m128i land(const __m128i  a, const __m128i b) {
+    //return (a & b);
+    return _mm_and_si128(a, b);
+   }
+
+   static __m128i lor(const __m128i a, const __m128i b) {
+    //return (a | b);
+    return _mm_or_si128(a, b);
+   }
+   static __m128i lnot(const __m128i a) {
+    //return ~a;
+    return _mm_andnot_si128(a, _mm_set1_epi32(0xFFFFFFFF));
    }
 };
 
@@ -205,5 +231,18 @@ struct BitBaseOp<__m256i> {
    static inline __m256i zero() {
       return _mm256_setzero_si256();
    }
+
+  static __m256i land(const __m256i  a, const __m256i b) {
+    return _mm256_and_si256(a, b);
+   }
+
+   static __m256i lor(const __m256i a, const __m256i b) {
+    return _mm256_or_si256(a, b);
+   }
+
+   static __m256i lnot(const __m256i a) {
+    return _mm256_andnot_si256(a, _mm256_set1_epi32(0xFFFFFFFF));
+   }
+
 };
 #endif

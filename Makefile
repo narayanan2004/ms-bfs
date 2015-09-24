@@ -2,6 +2,7 @@
 ifeq ($(CC),cc)
 	CC=g++
 endif
+CC=icpc
 
 BOOSTDIR=./boost
 BOOST_INC=$(BOOSTDIR)
@@ -20,7 +21,7 @@ ifeq ($(CC),g++)
 else
 	COMPILER_FLAGS=
 endif
-BASE_FLAGS=-g -std=c++11 -W -Wall -Wextra -pedantic $(MATH_FLAGS) -funroll-all-loops -fno-omit-frame-pointer $(COMPILER_FLAGS)
+BASE_FLAGS=-g -std=c++11 -W -Wall -Wextra -pedantic $(MATH_FLAGS) -funroll-all-loops -fno-omit-frame-pointer $(COMPILER_FLAGS) -I$(BOOST_INC)
 
 LOCAL_ARCH=-march=native
 RELEASE_ARCH=-march=native
@@ -107,10 +108,10 @@ $(EXEC_EXECUTABLE): main.o $(CORE_OBJECTS)
 endif
 
 %.release.o: %.cpp
-	$(CC) $(RELEASE_CFLAGS) $(LDFLAGS) -c $< -o $@ $(LIBS)
+	$(CC) $(RELEASE_CFLAGS) -c $< -o $@ 
 
 .cpp.o:
-	$(CC) $(CFLAGS) -DTRACE -c $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS) -DTRACE -c $< -o $@ 
 
 
 %.depends: %.cpp
